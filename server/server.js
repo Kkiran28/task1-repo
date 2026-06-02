@@ -5,13 +5,13 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
-// DATA FILE PATH
-const DATA_FILE = path.join(__dirname, "data", "tasks.json");
-
 // Middleware
 app.use(express.json());
 
-// Read Tasks
+// Data file path
+const DATA_FILE = path.join(__dirname, "data", "tasks.json");
+
+// Read tasks
 const readTasks = () => {
   try {
     const data = fs.readFileSync(DATA_FILE, "utf8");
@@ -21,7 +21,7 @@ const readTasks = () => {
   }
 };
 
-// Write Tasks
+// Write tasks
 const writeTasks = (tasks) => {
   fs.writeFileSync(
     DATA_FILE,
@@ -29,20 +29,18 @@ const writeTasks = (tasks) => {
   );
 };
 
-console.log("DATA FILE:", DATA_FILE);
-
 // Home Route
 app.get("/", (req, res) => {
   res.send("🚀 Server is running successfully!");
 });
 
-// Get All Tasks
+// GET All Tasks
 app.get("/api/tasks", (req, res) => {
   const tasks = readTasks();
   res.json(tasks);
 });
 
-// Create Task
+// CREATE Task
 app.post("/api/tasks", (req, res) => {
   const { title, description, dueDate, priority } = req.body;
 
@@ -68,9 +66,43 @@ app.post("/api/tasks", (req, res) => {
 
   writeTasks(tasks);
 
-  res.status(201).json(newTask);
+  res.status(201).json({
+    message: "Task created successfully",
+    task: newTask,
+  });
 });
 
+// UPDATE Task
+app.put("/api/tasks/:id", (req, res) => {
+  const { id } = req.params;
+
+  const tasks = readTasks();
+
+  const taskIndex = tasks.findIndex(
+    (task) => task.id === id
+  );
+
+  if (taskIndex === -1) {
+    return res.status(404).json({
+      message: "Task not found",
+    });
+  }
+
+  tasks[taskIndex] = {
+    ...tasks[taskIndex],
+    ...req.body,
+    id: tasks[taskIndex].id,
+  };
+
+  writeTasks(tasks);
+
+  res.json({
+    message: "Task updated successfully",
+    task: tasks[taskIndex],
+  });
+});
+
+// Start Server
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
