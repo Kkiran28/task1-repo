@@ -2,12 +2,14 @@ import { useState } from "react";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
 import { FilterBar } from "./components/FilterBar";
+import { SearchBar } from "./components/SearchBar";
 
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
   const [filter, setFilter] = useState("all");
+ const [searchTerm, setSearchTerm] = useState("");
 
   // ➤ ADD TASK
   const handleSubmit = (data) => {
@@ -44,10 +46,18 @@ function App() {
     console.log("Editing task:", task);
   };
  
-  const filteredTasks = tasks.filter((task) => {
-  if (filter === "completed") return task.completed;
-  if (filter === "active") return !task.completed;
-  return true; // all
+const filteredTasks = tasks.filter((task) => {
+  const matchesFilter =
+    filter === "completed"
+      ? task.completed
+      : filter === "active"
+      ? !task.completed
+      : true;
+
+  const matchesSearch =
+    task.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return matchesFilter && matchesSearch;
 });
 
   return (
@@ -61,6 +71,13 @@ function App() {
           onCancel={() => setEditingTask(null)}
         />
       </div>
+      {/* SEARCH BAR (ADD THIS) */}
+<div className="w-full max-w-xl">
+  <SearchBar
+    searchTerm={searchTerm}
+    onSearchChange={setSearchTerm}
+  />
+</div>
       {/* FILTER */}
 <div className="w-full max-w-xl">
   <FilterBar currentFilter={filter} onFilterChange={setFilter} />
