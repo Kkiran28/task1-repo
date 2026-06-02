@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
 import { FilterBar } from "./components/FilterBar";
@@ -15,6 +15,25 @@ function App() {
 const incomplete = tasks.filter(task => !task.completed).length;
   // ➤ ADD TASK
   const handleSubmit = (data) => {
+  if (editingTask) {
+    // ✅ UPDATE EXISTING TASK
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === editingTask.id
+          ? {
+              ...task,
+              title: data.title,
+              description: data.description,
+              dueDate: data.dueDate,
+              priority: data.priority,
+            }
+          : task
+      )
+    );
+
+    setEditingTask(null); // exit edit mode
+  } else {
+    // ➕ ADD NEW TASK
     const newTask = {
       id: Date.now().toString(),
       title: data.title,
@@ -26,7 +45,8 @@ const incomplete = tasks.filter(task => !task.completed).length;
     };
 
     setTasks((prev) => [newTask, ...prev]);
-  };
+  }
+};
 
   // ➤ TOGGLE COMPLETE
   const handleToggle = (id, value) => {
@@ -48,22 +68,35 @@ const incomplete = tasks.filter(task => !task.completed).length;
     console.log("Editing task:", task);
   };
  
-const filteredTasks = tasks.filter((task) => {
-  const matchesFilter =
-    filter === "completed"
-      ? task.completed
-      : filter === "active"
-      ? !task.completed
-      : true;
+const filteredTasks = useMemo(() => {
+  let filtered = tasks.filter((task) => {
+    const matchesFilter =
+      filter === "completed"
+        ? task.completed
+        : filter === "active"
+        ? !task.completed
+        : true;
 
-  const matchesSearch =
-    task.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-  return matchesFilter && matchesSearch;
-});
+    return matchesFilter && matchesSearch;
+  });
+
+  //SORT BY NEWEST FIRST
+  filtered.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  return filtered;
+}, [tasks, filter, searchTerm]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 flex flex-col items-center p-4 gap-4">
+      {/* TITLE (ADD THIS) */}
+    <h1 className="text-4xl font-extrabold text-white mb-4 drop-shadow-lg">
+  📋 Task Manager
+</h1>
 
       {/* FORM */}
       <div className="w-full max-w-xl">

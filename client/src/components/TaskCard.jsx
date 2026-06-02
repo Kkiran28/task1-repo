@@ -58,9 +58,20 @@ export const TaskCard = ({ task, onToggle, onEdit, onDelete }) => {
                 <button onClick={() => onEdit(task)} className="text-blue-300 font-bold text-lg hover:text-blue-100 transition">
                     ✏️
                 </button>
-                <button onClick={() => onDelete(task.id)} className="text-red-400 font-bold text-xl hover:text-red-300 transition">
-                    ✕
-                </button>
+                <button
+  onClick={() => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+
+    if (confirmDelete) {
+      onDelete(task.id);
+    }
+  }}
+  className="text-black font-bold text-xl hover:text-red-600 transition"
+>
+  ✕
+</button>
             </div>
         </div>
     );
