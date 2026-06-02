@@ -3,14 +3,16 @@ import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
 import { FilterBar } from "./components/FilterBar";
 import { SearchBar } from "./components/SearchBar";
+import { StatsCard } from "./components/StatsCard";
 
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
   const [filter, setFilter] = useState("all");
- const [searchTerm, setSearchTerm] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const completed = tasks.filter(task => task.completed).length;
+const incomplete = tasks.filter(task => !task.completed).length;
   // ➤ ADD TASK
   const handleSubmit = (data) => {
     const newTask = {
@@ -71,6 +73,7 @@ const filteredTasks = tasks.filter((task) => {
           onCancel={() => setEditingTask(null)}
         />
       </div>
+      
       {/* SEARCH BAR (ADD THIS) */}
 <div className="w-full max-w-xl">
   <SearchBar
@@ -78,10 +81,15 @@ const filteredTasks = tasks.filter((task) => {
     onSearchChange={setSearchTerm}
   />
 </div>
+
       {/* FILTER */}
 <div className="w-full max-w-xl">
   <FilterBar currentFilter={filter} onFilterChange={setFilter} />
-</div>      
+</div>  
+{/* STATS */}
+      <div className="w-full max-w-xl">
+  <StatsCard completed={completed} incomplete={incomplete} />
+</div>    
       {/* LIST / EMPTY STATE */}
       <div className="w-full max-w-xl">
         {filteredTasks.length === 0 ? (
