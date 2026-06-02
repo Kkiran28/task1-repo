@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
+import { FilterBar } from "./components/FilterBar";
+
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+  const [filter, setFilter] = useState("all");
 
   // ➤ ADD TASK
   const handleSubmit = (data) => {
@@ -40,6 +43,12 @@ function App() {
     setEditingTask(task);
     console.log("Editing task:", task);
   };
+ 
+  const filteredTasks = tasks.filter((task) => {
+  if (filter === "completed") return task.completed;
+  if (filter === "active") return !task.completed;
+  return true; // all
+});
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 flex flex-col items-center p-4 gap-4">
@@ -52,10 +61,13 @@ function App() {
           onCancel={() => setEditingTask(null)}
         />
       </div>
-
+      {/* FILTER */}
+<div className="w-full max-w-xl">
+  <FilterBar currentFilter={filter} onFilterChange={setFilter} />
+</div>      
       {/* LIST / EMPTY STATE */}
       <div className="w-full max-w-xl">
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
             <p className="text-white/80 text-sm">
               ✨ No tasks found. Create one to get started!
@@ -63,7 +75,7 @@ function App() {
           </div>
         ) : (
           <TaskList
-            tasks={tasks}
+            tasks={filteredTasks}
             onToggle={handleToggle}
             onEdit={handleEdit}
             onDelete={handleDelete}
