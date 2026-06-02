@@ -11,7 +11,7 @@ app.use(express.json());
 // Data file path
 const DATA_FILE = path.join(__dirname, "data", "tasks.json");
 
-// Read tasks
+// Helper: Read tasks
 const readTasks = () => {
   try {
     const data = fs.readFileSync(DATA_FILE, "utf8");
@@ -21,7 +21,7 @@ const readTasks = () => {
   }
 };
 
-// Write tasks
+// Helper: Write tasks
 const writeTasks = (tasks) => {
   fs.writeFileSync(
     DATA_FILE,
@@ -29,18 +29,24 @@ const writeTasks = (tasks) => {
   );
 };
 
-// Home Route
+// Home route
 app.get("/", (req, res) => {
   res.send("🚀 Server is running successfully!");
 });
 
-// GET All Tasks
+
+// =======================
+// GET ALL TASKS
+// =======================
 app.get("/api/tasks", (req, res) => {
   const tasks = readTasks();
   res.json(tasks);
 });
 
-// CREATE Task
+
+// =======================
+// CREATE TASK
+// =======================
 app.post("/api/tasks", (req, res) => {
   const { title, description, dueDate, priority } = req.body;
 
@@ -63,7 +69,6 @@ app.post("/api/tasks", (req, res) => {
   };
 
   tasks.push(newTask);
-
   writeTasks(tasks);
 
   res.status(201).json({
@@ -72,7 +77,10 @@ app.post("/api/tasks", (req, res) => {
   });
 });
 
-// UPDATE Task
+
+// =======================
+// UPDATE TASK
+// =======================
 app.put("/api/tasks/:id", (req, res) => {
   const { id } = req.params;
 
@@ -102,7 +110,36 @@ app.put("/api/tasks/:id", (req, res) => {
   });
 });
 
-// Start Server
+
+// =======================
+// DELETE TASK
+// =======================
+app.delete("/api/tasks/:id", (req, res) => {
+  const { id } = req.params;
+
+  const tasks = readTasks();
+
+  const filteredTasks = tasks.filter(
+    (task) => task.id !== id
+  );
+
+  if (tasks.length === filteredTasks.length) {
+    return res.status(404).json({
+      message: "Task not found",
+    });
+  }
+
+  writeTasks(filteredTasks);
+
+  res.json({
+    message: "Task deleted successfully",
+  });
+});
+
+
+// =======================
+// START SERVER
+// =======================
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
